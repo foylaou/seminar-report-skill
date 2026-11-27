@@ -1,0 +1,12 @@
+.env
+profile.md
+record/
+work/
+output/
+example_result/
+.DS_Store
+__pycache__/
+~$*
+.env.*
+!.env.example
+.claude/settings.local.json
