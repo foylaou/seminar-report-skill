@@ -12,7 +12,7 @@
 
 - Claude Code
 - Python 3.9 以上（只用標準函式庫，不需 `pip install`）
-- 轉錄音檔需要一個提供 `/v1/audio/transcriptions` 的 [LiteLLM](https://docs.litellm.ai/) 端點（Whisper 模型）
+- 轉錄音檔需要一個提供 `/v1/audio/transcriptions` 的端點（Whisper 模型）：自架 [LiteLLM](https://docs.litellm.ai/) 或直接使用 [OpenAI API](#直接使用-openai)
 - 音檔轉檔工具：macOS 內建 `afconvert`；其他系統或遇到不支援的格式請安裝 `ffmpeg`
 - 開發與測試環境為 macOS，Windows / Linux 未測試
 
@@ -28,14 +28,34 @@
 
    | 變數 | 說明 |
    |---|---|
-   | `LITELLM_BASE_URL` | LiteLLM 位址，結尾有沒有 `/v1` 都可以 |
-   | `LITELLM_API_KEY` | LiteLLM 金鑰 |
-   | `WHISPER_MODEL` | LiteLLM 設定中的 `model_name` |
+   | `LITELLM_BASE_URL` | LiteLLM 或 OpenAI 位址，結尾有沒有 `/v1` 都可以 |
+   | `LITELLM_API_KEY` | 該端點的 API 金鑰 |
+   | `WHISPER_MODEL` | LiteLLM 設定中的 `model_name`；OpenAI 填 `whisper-1` |
    | `WHISPER_LANGUAGE` | 錄音語言，預設 `zh`；留空自動偵測 |
    | `STUDENT_NAME` | 你的姓名 |
    | `STUDENT_ID` | 你的學號 |
 
 3. （建議）建立 `profile.md`，用幾句話寫下研究方向、工作背景和寫作語氣，心得會更像你自己寫的。
+
+### 直接使用 OpenAI
+
+沒有架 LiteLLM 也可以直接連 OpenAI，程式不用改。`.env` 這樣填（變數名稱雖然是 `LITELLM_` 開頭，一樣適用）：
+
+```ini
+LITELLM_BASE_URL=https://api.openai.com/v1
+LITELLM_API_KEY=你的 OpenAI API 金鑰
+WHISPER_MODEL=whisper-1
+WHISPER_LANGUAGE=zh
+```
+
+- ChatGPT Plus / Pro 訂閱不包含 API 用量，需到 [OpenAI API 平台](https://platform.openai.com/) 建立金鑰並設定付款。
+- 依錄音長度計費，價格以[官方定價頁](https://openai.com/api/pricing/)為準。
+- OpenAI 單次上傳上限 25 MB。預設每 10 分鐘切一段（約 19 MB），`--chunk-minutes` 不要設到 13 以上。
+- 建議用 `whisper-1`；其他轉錄模型未測試。
+- 錄音會傳到 OpenAI。
+- 此設定方式依 API 相容性撰寫，尚未用 OpenAI 金鑰實測。
+
+### 使用 LiteLLM
 
 LiteLLM 端的模型設定範例（寫在 LiteLLM 的 `config.yaml`，以 OpenAI Whisper 為例，自架模型請依實際情況調整）：
 
@@ -83,7 +103,7 @@ model_list:
 
 ## 隱私
 
-- 錄音會傳到你設定的 LiteLLM 端點（及其背後的模型服務）；逐字稿、簡報、照片與記憶內容會由 Claude 處理。錄音前請取得講者或主辦單位同意。
+- 錄音會傳到你設定的轉錄端點（及其背後的模型服務）；逐字稿、簡報、照片與記憶內容會由 Claude 處理。錄音前請取得講者或主辦單位同意。
 - 撰寫心得時會讀取本機 Claude Code 記憶（`~/.claude/`）中與背景相關的內容。skill 指示不得寫入金鑰、客戶名稱等敏感資訊，但仍請自行確認成品。
 - 分享本專案前，不要包含 `.env`、`profile.md`、`record/`、`work/`、`output/`，以及含真實姓名學號的 `example_result/`。`.gitignore` 已排除這些項目（只對 git 有效，手動壓縮時要自己移除）。
 - `skill/seminar-report/references/example.md` 是虛構範例；如果換成真實報告，分享前請取得作者同意並去識別化。
